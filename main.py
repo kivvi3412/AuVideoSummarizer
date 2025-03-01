@@ -218,10 +218,10 @@ class UI:
 
     def add_url_task(self, youtube_url):
         if youtube_url == "":
-            return self.update_table()
+            return self.update_table(), "不正确的url"
 
         if not self.is_valid_url(youtube_url):
-            return self.update_table()
+            return self.update_table(), "不正确的url"
 
         cur_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.tasks[self.current_task_number] = {
@@ -233,7 +233,7 @@ class UI:
         }
         threading.Thread(target=self.handle_url_task, args=(youtube_url, self.current_task_number), daemon=True).start()
         self.current_task_number += 1
-        return self.update_table()
+        return self.update_table(), ""
 
     def add_file_task(self, file):
         if file is None:
@@ -293,7 +293,7 @@ class UI:
                     gr.Markdown("### 摘要")
                     summary_md = gr.Markdown("请在左侧点击视频标题后在此处显示摘要。")
 
-            url_add_btn.click(fn=self.add_url_task, inputs=url_input, outputs=tasks_table)
+            url_add_btn.click(fn=self.add_url_task, inputs=url_input, outputs=[tasks_table, url_input])
             file_add_btn.click(fn=self.add_file_task, inputs=file_input, outputs=tasks_table)
             refresh_btn.click(fn=self.update_table, inputs=[], outputs=tasks_table)
             tasks_table.select(fn=self.get_summary, inputs=[], outputs=summary_md)
