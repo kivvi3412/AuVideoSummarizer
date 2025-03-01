@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-0 \
     git \
     poppler-utils \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
