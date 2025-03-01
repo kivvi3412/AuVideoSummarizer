@@ -10,11 +10,15 @@ services:
             - driver: nvidia
               count: all
               capabilities: [ "gpu" ]
-    restart: alwaysw
+    restart: always
     volumes:
       - au_video_summarizer:/app
     ports:
       - "7860:7860"
+    environment:
+      - API_KEY=sk-key
+      - BASE_URL=https://api.openai.com/v1
+      - MODEL=deepseek-r1-250120
 
 volumes:
   au_video_summarizer:
