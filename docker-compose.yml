@@ -1,0 +1,20 @@
+services:
+  ocr_service:
+    #    build: .
+    image: ghcr.io/kivvi3412/au_video_summarizer:latest
+    container_name: AuVideoSummarizer
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ "gpu" ]
+    restart: alwaysw
+    volumes:
+      - au_video_summarizer:/app
+    ports:
+      - "7860:7860"
+
+volumes:
+  au_video_summarizer:

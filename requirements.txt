@@ -1,0 +1,7 @@
+gradio==5.20.0
+torch==2.6.0
+torchaudio==2.6.0
+torchvision==0.21.0
+openai-whisper==20240930
+openai==1.65.1
+yt-dlp
