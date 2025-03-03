@@ -13,6 +13,7 @@ services:
     restart: always
     volumes:
       - au_video_summarizer:/app
+      - au_video_summarizer_whisper_data:/root/.cache/whisper
     ports:
       - "7860:7860"
     environment:
@@ -22,3 +23,4 @@ services:
 
 volumes:
   au_video_summarizer:
+  au_video_summarizer_whisper_data:

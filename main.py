@@ -181,16 +181,16 @@ class UI:
             if task["title"] == title:
                 if task["type"] == "url":
                     if task["summary"] == '':
-                        return task["status"]
+                        return task["status"], task["origin_text"]
                     else:
-                        return f'## [{task["title"]}]({task["url"]}) \n\n {task["summary"]}'
+                        return f'## [{task["title"]}]({task["url"]}) \n\n {task["summary"]}', task["origin_text"]
                 else:
                     if task["summary"] == '':
-                        return task["status"]
+                        return task["status"], task["origin_text"]
                     else:
-                        return f'## {task["title"]} \n\n {task["summary"]}'
+                        return f'## {task["title"]} \n\n {task["summary"]}', task["origin_text"]
 
-        return "未找到摘要"
+        return "未找到摘要", task["origin_text"]
 
     def handle_url_task(self, youtube_url, task_number):
         self.tasks[task_number]["type"] = "url"
@@ -204,6 +204,7 @@ class UI:
 
         self.tasks[task_number]["status"] = "正在语音转文本"
         text_result = self.audio_summarizer.extract_info_from_sub_or_audio(video_info)
+        self.tasks[task_number]["origin_text"] = text_result["text"]
 
         if text_result["status"] == "error":
             self.tasks[task_number]["summary"] = text_result["text"]
@@ -229,7 +230,9 @@ class UI:
             "title": youtube_url,  # 后台线程处理完成后更新为实际视频标题
             "url": youtube_url,
             "status": "未完成",  # 初始任务状态
-            "summary": ""  # 后台处理完成后存储摘要
+            "summary": "",  # 后台处理完成后存储摘要
+            "origin_text": "",  # 后台处理完成后存储原始文本
+            "type": "",  # url or file
         }
         threading.Thread(target=self.handle_url_task, args=(youtube_url, self.current_task_number), daemon=True).start()
         self.current_task_number += 1
@@ -245,7 +248,9 @@ class UI:
             "title": file.name.split("/")[-1],  # 后台线程处理完成后更新为实际标题
             "url": file.name,
             "status": "未完成",  # 初始任务状态
-            "summary": ""  # 后台处理完成后存储摘要
+            "summary": "",  # 后台处理完成后存储摘要
+            "origin_text": "",  # 后台处理完成后存储原始文本
+            "type": "",  # url or file
         }
         threading.Thread(target=self.handle_file_task, args=(file, self.current_task_number), daemon=True).start()
         self.current_task_number += 1
@@ -288,6 +293,11 @@ class UI:
                         label="任务概览 (点击标题查看摘要)",
                         max_height=300,
                     )
+                    origin_text = gr.Textbox(
+                        label="原始文本",
+                        placeholder="请在左侧点击视频标题后在此处显示原始文本。",
+                        max_lines=20,
+                    )
 
                 with gr.Column(scale=6):
                     gr.Markdown("### 摘要")
@@ -296,7 +306,7 @@ class UI:
             url_add_btn.click(fn=self.add_url_task, inputs=url_input, outputs=[tasks_table, url_input])
             file_add_btn.click(fn=self.add_file_task, inputs=file_input, outputs=tasks_table)
             refresh_btn.click(fn=self.update_table, inputs=[], outputs=tasks_table)
-            tasks_table.select(fn=self.get_summary, inputs=[], outputs=summary_md)
+            tasks_table.select(fn=self.get_summary, inputs=[], outputs=[summary_md, origin_text])
 
             demo.load(fn=self.update_table, inputs=[], outputs=tasks_table)
 
